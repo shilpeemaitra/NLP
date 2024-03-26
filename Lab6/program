@@ -1,1 +1,48 @@
 
+# Import the necessary modules and classes
+from chatterbot import ChatBot
+from chatterbot.trainers import ChatterBotCorpusTrainer
+
+# Create a new instance of a ChatBot
+chatbot = ChatBot(
+    'CookingBot',
+    storage_adapter='chatterbot.storage.SQLStorageAdapter',
+    logic_adapters=[
+        'chatterbot.logic.BestMatch',
+    ],
+    input_adapter='chatterbot.input.TerminalAdapter',
+    output_adapter='chatterbot.output.TerminalAdapter',
+    database_uri='sqlite:///database.sqlite3'
+)
+
+# Train the chatbot with a corpus
+trainer = ChatterBotCorpusTrainer(chatbot)
+trainer.train('chatterbot.corpus.english.greetings',
+              'chatterbot.corpus.english.conversations')
+
+# Create some specific cooking-related responses
+conversations = [
+    [
+        "What is a good recipe for pasta?",
+        "One good recipe for pasta is to boil some spaghetti, then sauté garlic, red pepper flakes, and olive oil in a pan. Add cooked spaghetti to the pan and toss to combine. Top with parmesan cheese and enjoy!"
+    ],
+    [
+        "How do I bake a cake?",
+        "To bake a cake, first preheat your oven to 350°F (175°C). Grease and flour a cake pan. Mix together flour, sugar, baking powder, and salt in a large bowl. Add eggs, oil, and milk and beat until well combined. Pour the batter into the prepared pan and bake for 30-35 minutes, or until a toothpick inserted into the center of the cake comes out clean."
+    ],
+    # Add more cooking-related conversations here
+]
+
+for conversation in conversations:
+    chatbot.learn_response(conversation[0], conversation[1])
+
+# Now let's test our chatbot
+print("Type something to begin...")
+while True:
+    try:
+        user_input = input()
+        bot_response = chatbot.get_response(user_input)
+        print(bot_response)
+
+    except (KeyboardInterrupt, EOFError, SystemExit):
+        break
